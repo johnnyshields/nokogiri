@@ -76,13 +76,8 @@ describe 'namespaces in child elements' do
       assert_includes(doc, '<root xmlns="http://outer-namespace.org/">')
       assert_includes(doc, '<outer>in outer namespace</outer>')
       assert_includes(doc, '<inner xmlns="http://inner-namespace.org/">')
-      # TODO: JRuby's behavior here is incorrect.
-      # See: https://github.com/sparklemotion/nokogiri/issues/3457
-      if Nokogiri.jruby?
-        assert_includes(doc, '<element xmlns="http://outer-namespace.org/">in inner namespace</element>')
-      else
-        assert_includes(doc, '<element>in inner namespace</element>')
-      end
+      assert_includes(doc, '<element xmlns="http://outer-namespace.org/">in inner namespace</element>')
+      assert_includes(doc, '<element>in inner namespace</element>')
       assert_includes(doc, '<another>back in outer namespace</another>')
     end
   end
@@ -184,11 +179,7 @@ describe 'namespaces in child elements' do
       assert_includes(doc, '<mixed xmlns="http://new-default.org/">')
       # TODO: JRuby's behavior here is incorrect.
       # See: https://github.com/sparklemotion/nokogiri/issues/3457
-      if Nokogiri.jruby?
-        assert_includes(doc, '<new_default xmlns="http://default.org/">in new default namespace</new_default>')
-      else
-        assert_includes(doc, '<new_default>in new default namespace</new_default>')
-      end
+      assert_includes(doc, '<new_default>in new default namespace</new_default>')
       assert_includes(doc, '<ns:still_prefixed>still using original prefixed namespace</ns:still_prefixed>')
     end
   end

@@ -350,12 +350,10 @@ public class DOM2DTMdefaultNamespaceDeclarationNode implements Attr, TypeInfo
    * @since DOM Level 3
    */
   public String
-  lookupNamespaceURI(String specifiedPrefix)
-  {
+  lookupNamespaceURI(String specifiedPrefix) {
     short type = this.getNodeType();
     switch (type) {
-      case Node.ELEMENT_NODE : {
-
+      case Node.ELEMENT_NODE: {
         String namespace = this.getNamespaceURI();
         String prefix = this.getPrefix();
         if (namespace != null) {
@@ -391,45 +389,41 @@ public class DOM2DTMdefaultNamespaceDeclarationNode implements Attr, TypeInfo
             }
           }
         }
-        /*
-        NodeImpl ancestor = (NodeImpl)getElementAncestor(this);
+
+        Node ancestor = getElementAncestor(this);
         if (ancestor != null) {
-            return ancestor.lookupNamespaceURI(specifiedPrefix);
+          return ancestor.lookupNamespaceURI(specifiedPrefix);
         }
-        */
 
         return null;
-
-
       }
-      /*
-              case Node.DOCUMENT_NODE : {
-                      return((NodeImpl)((Document)this).getDocumentElement()).lookupNamespaceURI(specifiedPrefix) ;
-                  }
-      */
-      case Node.ENTITY_NODE :
+      case Node.DOCUMENT_NODE: {
+        Element docElement = ((Document)this).getDocumentElement();
+        if (docElement != null) {
+          return docElement.lookupNamespaceURI(specifiedPrefix);
+        }
+        return null;
+      }
+      case Node.ENTITY_NODE:
       case Node.NOTATION_NODE:
       case Node.DOCUMENT_FRAGMENT_NODE:
       case Node.DOCUMENT_TYPE_NODE:
         // type is unknown
         return null;
       case Node.ATTRIBUTE_NODE: {
-        if (this.getOwnerElement().getNodeType() == Node.ELEMENT_NODE) {
+        if (this.getOwnerElement() != null) {
           return getOwnerElement().lookupNamespaceURI(specifiedPrefix);
-
         }
         return null;
       }
       default: {
-        /*
-             NodeImpl ancestor = (NodeImpl)getElementAncestor(this);
-             if (ancestor != null) {
-                 return ancestor.lookupNamespaceURI(specifiedPrefix);
-             }
-          */
+        // For other node types, check ancestor elements
+        Node ancestor = getElementAncestor(this);
+        if (ancestor != null) {
+          return ancestor.lookupNamespaceURI(specifiedPrefix);
+        }
         return null;
       }
-
     }
   }
 
@@ -443,71 +437,67 @@ public class DOM2DTMdefaultNamespaceDeclarationNode implements Attr, TypeInfo
    * @since DOM Level 3
    */
   public boolean
-  isDefaultNamespace(String namespaceURI)
-  {
-    /*
-     // REVISIT: remove casts when DOM L3 becomes REC.
-     short type = this.getNodeType();
-     switch (type) {
-     case Node.ELEMENT_NODE: {
-         String namespace = this.getNamespaceURI();
-         String prefix = this.getPrefix();
+  isDefaultNamespace(String namespaceURI) {
+    short type = this.getNodeType();
+    switch (type) {
+      case Node.ELEMENT_NODE: {
+        String namespace = this.getNamespaceURI();
+        String prefix = this.getPrefix();
 
-         // REVISIT: is it possible that prefix is empty string?
-         if (prefix == null || prefix.length() == 0) {
-             if (namespaceURI == null) {
-                 return (namespace == namespaceURI);
-             }
-             return namespaceURI.equals(namespace);
-         }
-         if (this.hasAttributes()) {
-             ElementImpl elem = (ElementImpl)this;
-             NodeImpl attr = (NodeImpl)elem.getAttributeNodeNS("http://www.w3.org/2000/xmlns/", "xmlns");
-             if (attr != null) {
-                 String value = attr.getNodeValue();
-                 if (namespaceURI == null) {
-                     return (namespace == value);
-                 }
-                 return namespaceURI.equals(value);
-             }
-         }
+        // REVISIT: is it possible that prefix is empty string?
+        if (prefix == null || prefix.length() == 0) {
+          if (namespaceURI == null) {
+            return (namespace == namespaceURI);
+          }
+          return namespaceURI.equals(namespace);
+        }
 
-         NodeImpl ancestor = (NodeImpl)getElementAncestor(this);
-         if (ancestor != null) {
-             return ancestor.isDefaultNamespace(namespaceURI);
-         }
-         return false;
-     }
-     case Node.DOCUMENT_NODE:{
-             return((NodeImpl)((Document)this).getDocumentElement()).isDefaultNamespace(namespaceURI);
-         }
+        if (this.hasAttributes()) {
+          Element elem = (Element)this;
+          Node attr = elem.getAttributeNode("xmlns");
+          if (attr != null) {
+            String value = attr.getNodeValue();
+            if (namespaceURI == null) {
+              return (value == null);
+            }
+            return namespaceURI.equals(value);
+          }
+        }
 
-     case Node.ENTITY_NODE :
-       case Node.NOTATION_NODE:
-     case Node.DOCUMENT_FRAGMENT_NODE:
-     case Node.DOCUMENT_TYPE_NODE:
-         // type is unknown
-         return false;
-     case Node.ATTRIBUTE_NODE:{
-             if (this.ownerNode.getNodeType() == Node.ELEMENT_NODE) {
-                 return ownerNode.isDefaultNamespace(namespaceURI);
-
-             }
-             return false;
-         }
-     default:{
-             NodeImpl ancestor = (NodeImpl)getElementAncestor(this);
-             if (ancestor != null) {
-                 return ancestor.isDefaultNamespace(namespaceURI);
-             }
-             return false;
-         }
-
-     }
-    */
-    return false;
-
-
+        // Check ancestor for default namespace
+        Node ancestor = getElementAncestor(this);
+        if (ancestor != null) {
+          return ancestor.isDefaultNamespace(namespaceURI);
+        }
+        return false;
+      }
+      case Node.DOCUMENT_NODE: {
+        Element docElement = ((Document)this).getDocumentElement();
+        if (docElement != null) {
+          return docElement.isDefaultNamespace(namespaceURI);
+        }
+        return false;
+      }
+      case Node.ENTITY_NODE:
+      case Node.NOTATION_NODE:
+      case Node.DOCUMENT_FRAGMENT_NODE:
+      case Node.DOCUMENT_TYPE_NODE:
+        // type is unknown
+        return false;
+      case Node.ATTRIBUTE_NODE: {
+        if (this.getOwnerElement() != null) {
+          return getOwnerElement().isDefaultNamespace(namespaceURI);
+        }
+        return false;
+      }
+      default: {
+        Node ancestor = getElementAncestor(this);
+        if (ancestor != null) {
+          return ancestor.isDefaultNamespace(namespaceURI);
+        }
+        return false;
+      }
+    }
   }
 
   /**
@@ -519,52 +509,88 @@ public class DOM2DTMdefaultNamespaceDeclarationNode implements Attr, TypeInfo
    * @return the prefix for the namespace
    */
   public String
-  lookupPrefix(String namespaceURI)
-  {
-
-    // REVISIT: When Namespaces 1.1 comes out this may not be true
+  lookupPrefix(String namespaceURI) {
     // Prefix can't be bound to null namespace
     if (namespaceURI == null) {
       return null;
     }
 
     short type = this.getNodeType();
-
     switch (type) {
-      /*
-              case Node.ELEMENT_NODE: {
-
-                      String namespace = this.getNamespaceURI(); // to flip out children
-                      return lookupNamespacePrefix(namespaceURI, (ElementImpl)this);
-                  }
-
-              case Node.DOCUMENT_NODE:{
-                      return((NodeImpl)((Document)this).getDocumentElement()).lookupPrefix(namespaceURI);
-                  }
-      */
-      case Node.ENTITY_NODE :
+      case Node.ELEMENT_NODE: {
+        return lookupNamespacePrefix(namespaceURI, (Element)this);
+      }
+      case Node.DOCUMENT_NODE: {
+        Element docElement = ((Document)this).getDocumentElement();
+        if (docElement != null) {
+          return docElement.lookupPrefix(namespaceURI);
+        }
+        return null;
+      }
+      case Node.ENTITY_NODE:
       case Node.NOTATION_NODE:
       case Node.DOCUMENT_FRAGMENT_NODE:
       case Node.DOCUMENT_TYPE_NODE:
         // type is unknown
         return null;
       case Node.ATTRIBUTE_NODE: {
-        if (this.getOwnerElement().getNodeType() == Node.ELEMENT_NODE) {
+        if (this.getOwnerElement() != null) {
           return getOwnerElement().lookupPrefix(namespaceURI);
-
         }
         return null;
       }
       default: {
-        /*
-                        NodeImpl ancestor = (NodeImpl)getElementAncestor(this);
-                        if (ancestor != null) {
-                            return ancestor.lookupPrefix(namespaceURI);
-                        }
-        */
+        // For other node types, check ancestor elements
+        Node ancestor = getElementAncestor(this);
+        if (ancestor != null) {
+          return ancestor.lookupPrefix(namespaceURI);
+        }
         return null;
       }
     }
+  }
+
+  private String
+  lookupNamespacePrefix(String namespaceURI, Element element) {
+    String namespace = element.getNamespaceURI();
+    String prefix = element.getPrefix();
+
+    if (namespace != null && namespace.equals(namespaceURI) && prefix != null) {
+      // Found a match
+      String foundNamespace = element.lookupNamespaceURI(prefix);
+      if (foundNamespace != null && foundNamespace.equals(namespaceURI)) {
+        return prefix;
+      }
+    }
+
+    // Check attributes
+    if (element.hasAttributes()) {
+      NamedNodeMap attrs = element.getAttributes();
+      for (int i = 0; i < attrs.getLength(); i++) {
+        Node attr = attrs.item(i);
+        if (attr.getPrefix() != null && attr.getPrefix().equals("xmlns") &&
+            attr.getNodeValue().equals(namespaceURI)) {
+          return attr.getLocalName();
+        }
+      }
+    }
+
+    // Check ancestors
+    Node ancestor = getElementAncestor(element);
+    if (ancestor != null && ancestor.getNodeType() == Node.ELEMENT_NODE) {
+      return lookupNamespacePrefix(namespaceURI, (Element)ancestor);
+    }
+
+    return null;
+  }
+
+  private Node
+  getElementAncestor(Node node) {
+    Node parent = node.getParentNode();
+    while (parent != null && parent.getNodeType() != Node.ELEMENT_NODE) {
+      parent = parent.getParentNode();
+    }
+    return parent;
   }
 
   /**
